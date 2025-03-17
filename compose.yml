@@ -1,0 +1,40 @@
+services:
+  misskey-nginx:
+    image: nginx:1-alpine
+    volumes:
+      - ./configs/misskey/nginx/conf.d:/etc/nginx/conf.d
+      - ./configs/misskey/nginx/confs:/etc/nginx/confs
+      - ./certs/nginx:/etc/nginx/certs
+    ports:
+      - 80:80
+      - 443:443
+    extra_hosts:
+      - host.docker.internal:host-gateway
+  misskey:
+    build: ./misskey
+    volumes:
+      - ./configs/misskey/files:/misskey/files
+      - ./configs/misskey/.config:/misskey/.config:ro
+      - ./certs/root:/certs
+    environment:
+      - NODE_ENV=development
+      - NODE_EXTRA_CA_CERTS=/certs/rootCA.pem
+    depends_on:
+      - db
+      - redis
+  db:
+    image: postgres:15-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    env_file:
+      - ./configs/misskey/.config/docker.env
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+
+volumes:
+  db_data:
+  redis_data:
