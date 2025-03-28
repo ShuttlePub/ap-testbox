@@ -2,9 +2,13 @@ services:
   misskey-nginx:
     image: nginx:1-alpine
     volumes:
+      - ./configs/nginx/confs:/etc/nginx/confs
       - ./configs/misskey/nginx/conf.d:/etc/nginx/conf.d
-      - ./configs/misskey/nginx/confs:/etc/nginx/confs
       - ./certs/nginx:/etc/nginx/certs
+    networks:
+      default:
+        aliases:
+          - shuttlepub.localhost
     ports:
       - 8080:80
       - 4430:443
